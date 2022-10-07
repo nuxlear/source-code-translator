@@ -19,16 +19,18 @@ def generate_explanation(input_text, mode=None):
     if mode == 'generate':
         input_text = f'"""\n{input_text}\n"""'
     if mode == 'explain':
-        input_text = f'# Python 3\n{input_text}\n\n# Explanation of what the code does\n\n#'
+        input_text = f'{input_text}\n\n"""\nHere\'s what the above Python 3 code is doing:\n1. '
+    if mode == 'test':
+        input_text = f'{input_text}\n\n# Test the code above\n\n'
 
     response = openai.Completion.create(
         model="text-davinci-002",
         prompt=input_text,
-        temperature=0.7,
-        max_tokens=256,
+        temperature=0.5,
+        max_tokens=384,
         top_p=1.0,
         frequency_penalty=0.0,
-        presence_penalty=0.0
+        presence_penalty=0.05
     )
     answer = response.choices[0]
     return answer.text
@@ -38,13 +40,15 @@ if __name__ == '__main__':
 #     code = '''name = input("What is your name? ")
 # print("Hello, " + name)'''
 #     generate_explanation(code)
-    demo = gr.Interface(fn=generate_explanation,
-                        inputs=[
-                            gr.Textbox(lines=40, max_lines=40),
-                            gr.Radio(choices=['generate', 'explain'],
-                                     label=['Generate Code', 'Explain Code']),
-                        ],
-                        outputs=[
-                            gr.Textbox(lines=50, max_lines=50),
-                        ])
+    demo = gr.Interface(
+        fn=generate_explanation,
+        inputs=[
+            gr.Textbox(lines=40, max_lines=40),
+            gr.Radio(choices=['generate', 'explain', 'test'],
+                     label=['Generate Code', 'Explain Code', 'Test Code']),
+        ],
+        outputs=[
+            gr.Textbox(lines=50, max_lines=50),
+        ]
+    )
     demo.launch()
