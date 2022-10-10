@@ -20,34 +20,29 @@ def get_explanation(code, n=3):
     return [f'{query}{x}"""' for x in res_texts]
 
 
-def get_enhancements(code, n=3):
-    file_path = save_code_to_tmp_file(code)
+def get_enhancements(code, vulnerabilities=None, n=3):
+    if vulnerabilities is None:
+        vulnerabilities = find_vulnerabilities(code)
 
-    vulnerabilities = find_vulnerabilities(str(file_path))
     results = []
     for v in vulnerabilities:
         prompt = make_prompt_query_for_enhancement(v, code)
 
-        candidates = generate_explanation(prompt, num_results=n, max_tokens=384)
+        candidates = generate_explanation(prompt, num_results=n, max_tokens=384, stop=['##', '%%'])
         cand_texts = [x.text for x in candidates]
         cand_texts = list(set(cand_texts))
 
         answers = []
         for cand_text in cand_texts:
-            cand_file_path = save_code_to_tmp_file(cand_text)
-
-            fixed_vuls = find_vulnerabilities(str(cand_file_path))
+            fixed_vuls = find_vulnerabilities(cand_text)
 
             is_valid_code = all([fv['type'] not in ['error', 'fatal'] for fv in fixed_vuls])
             is_vul_remains = any([is_same_vulnerability(v, fv) for fv in fixed_vuls])
             if is_valid_code and not is_vul_remains:
                 answers.append(cand_text)
 
-            os.remove(cand_file_path)
-
         results.append((v, answers))
 
-    os.remove(file_path)
     return results
 
 
@@ -63,13 +58,11 @@ def get_generation(query, n=3):
 
     results = []
     for cand_text in cand_texts:
-        cand_file_path = save_code_to_tmp_file(cand_text)
-        fixed_vuls = find_vulnerabilities(str(cand_file_path))
+        fixed_vuls = find_vulnerabilities(cand_text)
 
         is_valid_code = all([fv['type'] not in ['error', 'fatal'] for fv in fixed_vuls])
         if is_valid_code:
             results.append(cand_text)
-        os.remove(cand_file_path)
 
     return results
 
@@ -87,13 +80,11 @@ def get_modification(code, query, n=3):
     # TODO: need to check that the code is modified correctly
     results = []
     for cand_text in cand_texts:
-        cand_file_path = save_code_to_tmp_file(cand_text)
-        fixed_vuls = find_vulnerabilities(str(cand_file_path))
+        fixed_vuls = find_vulnerabilities(cand_text)
 
         is_valid_code = all([fv['type'] not in ['error', 'fatal'] for fv in fixed_vuls])
         if is_valid_code:
             results.append(cand_text)
-        os.remove(cand_file_path)
 
     return results
 
@@ -108,13 +99,11 @@ def get_test_code(code, n=3):
 
     results = []
     for cand_text in cand_texts:
-        cand_file_path = save_code_to_tmp_file(cand_text)
-        fixed_vuls = find_vulnerabilities(str(cand_file_path))
+        fixed_vuls = find_vulnerabilities(cand_text)
 
         is_runnable_code = all([fv['type'] not in ['fatal'] for fv in fixed_vuls])
         if is_runnable_code:
             results.append(cand_text)
-        os.remove(cand_file_path)
 
     return results
 

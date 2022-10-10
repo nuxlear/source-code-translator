@@ -5,19 +5,24 @@ from io import StringIO
 # from flake8.api import legacy as flake8
 from contextlib import redirect_stdout
 import json
+import os
 
 from code_translator.utils import save_code_to_tmp_file
 
 
-def find_vulnerabilities(code_file):
+def find_vulnerabilities(code):
+    code_file = save_code_to_tmp_file(code)
+
     lint_output = StringIO()
     reporter = JSONReporter(lint_output)
 
     with redirect_stdout(lint_output):
-        Run([code_file, '--output-format=json'], reporter=reporter, exit=False)
+        Run([str(code_file), '--output-format=json', '--disable=E0602,E1101,E0401'], reporter=reporter, exit=False)
 
     report = lint_output.getvalue()
     report = json.loads(report)
+
+    os.remove(code_file)
 
     vulnerabilities = [x for x in report if x['type'] in ['warning', 'error', 'fatal']]
     return vulnerabilities
