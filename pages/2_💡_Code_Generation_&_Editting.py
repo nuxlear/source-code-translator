@@ -3,6 +3,45 @@ import streamlit as st
 
 
 if __name__ == '__main__':
+    st.write(
+        """<style>
+        [data-testid="stSidebar"] [data-testid="stImage"] {
+            margin-top: 250px;
+        }
+        svg {
+            margin: 0 10px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    cols = st.sidebar.columns(3)
+    cols[0].write('')
+    cols[1].image('images/logo_bw.png')
+    cols[2].write('')
+
+    st.sidebar.markdown(
+        '<h2 style="text-align: center; color: grey; font-family: \'Roboto Condensed\' sans-serif;"><i>Python Code Translator</i></h2>',
+        unsafe_allow_html=True)
+    st.sidebar.markdown(
+        '<p style="text-align: center; color: #aaaaaa; font-family: \'Roboto Condensed\' sans-serif;"><i><br>Junwon Hwang</i></p>\n',
+        unsafe_allow_html=True)
+    st.sidebar.markdown('''
+            <div style="display: flex; justify-content: center; align-content: center;">
+                <a href="https://github.com/nuxlear">
+                    <div><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-github" viewBox="0 0 16 16">
+                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                    </svg></div>
+                </a>
+                <a href="mailto:nuclear1221@gmail.com">
+                    <div><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="grey" class="bi bi-envelope-fill" viewBox="0 0 16 16">
+                            <path d="M.05 3.555A2 2 0 0 1 2 2h12a2 2 0 0 1 1.95 1.555L8 8.414.05 3.555ZM0 4.697v7.104l5.803-3.558L0 4.697ZM6.761 8.83l-6.57 4.027A2 2 0 0 0 2 14h12a2 2 0 0 0 1.808-1.144l-6.57-4.027L8 9.586l-1.239-.757Zm3.436-.586L16 11.801V4.697l-5.803 3.546Z"/>
+                    </svg></div>
+                </a>
+            </div>
+            ''', unsafe_allow_html=True)
+
     gen_container = st.container()
 
     gen_container.header('💡 Code Generation & Editing')
@@ -11,9 +50,42 @@ if __name__ == '__main__':
         st.session_state.gen_input = None
     if 'gen_results' not in st.session_state:
         st.session_state.gen_results = None
+    if 'is_context_expand' not in st.session_state:
+        st.session_state.is_context_expand = False
 
     gen_manual = gen_container.expander('See Example For Help')
-    gen_manual.write('')
+    gen_manual.markdown('''
+    ### How To Use?
+    
+    1) For code generation, first enter your description of what you want to generate. 
+    
+    The description can be short or long enough, but try not exceeding **20 lines**. 
+    ''')
+    gen_manual.image('images/gen_1.png', 'Sample input description for code generation', use_column_width='auto')
+    gen_manual.markdown('''
+    After that, click the **Generate Code** button below to generate the code. 
+    ''')
+    gen_manual.image('images/gen_2.png', use_column_width='auto')
+    gen_manual.markdown('''
+    2) If you want to modify your code, you can expand the code input menu, and enter your code. 
+    ''')
+    # gen_manual.image('images/gen_3.png', use_column_width='auto')
+    gen_manual.markdown('''
+    Then, click the **Generate Code** button below as same as the code generation. 
+    
+    The application will automatically choose the code generation/modification by checking whether the code is given. 
+    ''')
+    gen_manual.markdown('''
+    When the model finishes the job, the generated/modified code samples appear on the right side. 
+    
+    The result code might be different from your intent, or sometimes invalid, so you can choose the proper code from the samples. 
+    ''')
+    gen_manual.image('images/gen_4.png', 'Sample output code. The result can be different from yours. ', use_column_width='auto')
+    gen_manual.markdown('''
+    👉 If you didn't get an appropriate results, you may need to change your description or just retry it!
+    
+    The results can vary according to your input and trials. 
+    ''')
 
     msg_bar = gen_container.empty()
     gen_ui = gen_container.container()
@@ -21,9 +93,13 @@ if __name__ == '__main__':
 
     gen_input_form = input_cols.form(key='generate_input')
     with gen_input_form:
-        gen_context_container = gen_input_form.expander('👉 Click here to edit your code')
-        gen_context_code = gen_context_container.text_area('Enter your code for editting', height=500, key='gen_input_code')
+        gen_context_container = gen_input_form.expander('👉 Click here to edit your code',
+                                                        expanded=st.session_state.is_context_expand)
+        gen_context_code = gen_context_container.text_area('Enter your code for editting',
+                                                           value=st.session_state.gen_input[0] if st.session_state.gen_input else '',
+                                                           height=500, key='gen_input_code')
         gen_query = gen_input_form.text_area('Explain your code, or Explain the differences you want to change',
+                                             value=st.session_state.gen_input[1] if st.session_state.gen_input else '',
                                              height=200, key='gen_input_query')
         gen_button = gen_input_form.form_submit_button('Generate Code')
 
@@ -35,16 +111,21 @@ if __name__ == '__main__':
     if gen_button or st.session_state.gen_input is not None:
         if (gen_context_code, gen_query) != st.session_state.gen_input and gen_query != '':
             st.session_state.gen_results = None
+        if gen_context_code != '':
+            st.session_state.is_context_expand = True
         st.session_state.gen_input = (code, query) = (gen_context_code, gen_query)
+        print(st.session_state.gen_input)
 
         if query == '':
             msg_bar.warning('The entered text is empty. ')
 
         elif st.session_state.gen_results is None:
-            if code == '':
-                res = get_generation(query)
-            else:
-                res = get_modification(code, query)
+            with output_container:
+                with st.spinner('Generating...'):
+                    if code == '':
+                        res = get_generation(query)
+                    else:
+                        res = get_modification(code, query)
 
             if len(res) == 0:
                 msg_bar.error('No results found...', icon='⚠️')

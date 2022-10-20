@@ -1,7 +1,11 @@
+from code_translator.db import get_db_engine, get_session, CodeTranslateResults
+from sqlalchemy.exc import SQLAlchemyError
+
 import os
 from pathlib import Path
 import uuid
 import ast
+import json
 
 
 tmp_input_dir = Path('tmp_input')
@@ -15,7 +19,7 @@ def save_code_to_tmp_file(code):
     filename = f'{uuid.uuid4()}.py'
     file_path = tmp_input_dir / filename
 
-    with open(file_path, 'w') as f:
+    with open(file_path, 'w', encoding='utf-8') as f:
         f.write(code)
 
     return file_path
@@ -35,6 +39,36 @@ def remove_syntax_error_in_code(code):
             pass
 
     return None
+
+
+def record_user_data(code=None, query=None, candidates=None, results=None):
+    if (code, query) == (None, None):
+        raise ValueError('One of `code` or `query` must not be None. ')
+    candidates = candidates or []
+    results = results or []
+
+    d = {
+        'code': code,
+        'query': query,
+        'candidates': [dict(x) for x in candidates],
+        'results': results,
+    }
+    item_id = uuid.uuid4()
+    filename = f'{item_id}.json'
+    with open(f'userdata/{filename}', 'w', encoding='utf-8') as f:
+        json.dump(d, f, indent=4)
+
+    engine = get_db_engine('db_tokens_main.json')
+    orm = CodeTranslateResults(filename=filename)
+    try:
+        with get_session(engine) as session:
+            session.add(orm)
+            session.commit()
+        return True
+    except SQLAlchemyError as e:
+        print(e)
+        print(e.__traceback__)
+        return False
 
 
 def find_valid_objects_in_code(code):

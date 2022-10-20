@@ -1,6 +1,6 @@
 from code_translator.core import generate_explanation
 from code_translator.validate import find_vulnerabilities, make_prompt_query_for_enhancement, is_same_vulnerability
-from code_translator.utils import save_code_to_tmp_file
+from code_translator.utils import save_code_to_tmp_file, record_user_data
 
 import os
 import re
@@ -17,7 +17,10 @@ def get_explanation(code, n=3):
 
     cand_texts = [x.text.split('"""')[0] for x in candidates if x.finish_reason == 'stop' or '"""' in x.text]
     res_texts = [x for x in cand_texts if len(x.strip()) > 0]
-    return [f'{query}{x}"""' for x in res_texts]
+    results = [f'The explanation of the Python 3 code:\n1. {x}' for x in res_texts]
+
+    record_user_data(code, None, candidates, results)
+    return results
 
 
 def get_enhancements(code, vulnerabilities=None, n=3):
@@ -43,6 +46,7 @@ def get_enhancements(code, vulnerabilities=None, n=3):
 
         results.append((v, answers))
 
+        record_user_data(code, v["message"], candidates, answers)
     return results
 
 
@@ -54,7 +58,7 @@ def get_generation(query, n=3):
     # cand_texts = [x.text for x in candidates if x.finish_reason == 'stop' or main_script_pattern.search(x.text) is not None]
     cand_texts = [x.text for x in candidates]
     cand_texts = [re.split(main_script_pattern, x, 1)[0].strip() for x in cand_texts]
-    cand_texts = list(set(cand_texts))
+    cand_texts = [x for x in set(cand_texts) if x.strip() != '']
 
     results = []
     for cand_text in cand_texts:
@@ -64,10 +68,12 @@ def get_generation(query, n=3):
         if is_valid_code:
             results.append(cand_text)
 
+    record_user_data(None, query, candidates, results)
     return results
 
 
 def get_modification(code, query, n=3):
+    orig_query = query
     query = f'"""Modify the Python 3 code above as:\n{query}\n"""'
     prompt = f'{code}\n\n{query}\n\n## Modified code\n\n'
 
@@ -75,7 +81,7 @@ def get_modification(code, query, n=3):
 
     cand_texts = [x.text for x in candidates if x.finish_reason == 'stop' or main_script_pattern.search(x.text) is not None]
     cand_texts = [re.split(main_script_pattern, x, 1)[0].strip() for x in cand_texts]
-    cand_texts = list(set(cand_texts))
+    cand_texts = [x for x in set(cand_texts) if x.strip() != '']
 
     # TODO: need to check that the code is modified correctly
     results = []
@@ -86,6 +92,7 @@ def get_modification(code, query, n=3):
         if is_valid_code:
             results.append(cand_text)
 
+    record_user_data(code, orig_query, candidates, results)
     return results
 
 
@@ -105,6 +112,7 @@ def get_test_code(code, n=3):
         if is_runnable_code:
             results.append(cand_text)
 
+    record_user_data(code, None, candidates, results)
     return results
 
 
