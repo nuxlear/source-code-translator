@@ -3,3 +3,5 @@ gradio
 pylint
 fastapi
 streamlit
+sqlalchemy
+mysqlclient
