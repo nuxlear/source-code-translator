@@ -50,6 +50,14 @@ def main_page():
         </div>
         ''', unsafe_allow_html=True)
 
+    st.sidebar.markdown('''
+        <div style="display: flex; justify-content: center; align-content: center; margin-top:80px;">
+            <a href="https://forms.gle/E2fvoVwEZgMyGUJXA">
+                <p style="text-align: center; color: #65afc5; font-family: \'Roboto Condensed\' sans-serif;">Contact Us</p>
+            </a>
+        </div>
+        ''', unsafe_allow_html=True)
+
     st.image('images/logo.png', width=200)
     st.header('Python Code Translator')
 

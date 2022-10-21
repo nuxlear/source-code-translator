@@ -90,7 +90,9 @@ def wrap_db_success(func):
 # @wrap_db_success
 def insert(orm):
     with get_session(get_db_engine('db_tokens_main.json')) as session:
-        session.add(orm)
+        keys = [x.key for x in orm.__table__.c if x.key not in ['id', 'timestamp']]
+        o = orm.__class__(**{k: getattr(orm, k) for k in keys})
+        session.add(o)
         session.commit()
 
 
