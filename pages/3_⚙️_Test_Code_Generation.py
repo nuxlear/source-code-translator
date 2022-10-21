@@ -57,25 +57,38 @@ if __name__ == '__main__':
         st.session_state.test_results = None
 
     test_manual = test_container.expander('See Example For Help')
-    test_manual.markdown('''
+    cols = test_manual.columns(2)
+    cols[0].markdown('''
     ### How To Use?
 
     First, enter your code that you want to be tested. 
     ''')
-    test_manual.image('images/test_1.png', 'Sample input code for test code generation. ', use_column_width='auto')
-    test_manual.markdown('''
+    cols[1].image('images/test_1.png', 'Sample input code for test code generation. ', use_column_width='auto')
+
+    cols = test_manual.columns(2)
+    cols[0].markdown('''
     After that, you only need to click the **"Generate Test Code"** below!
     ''')
-    test_manual.image('images/test_2.png', use_column_width='auto')
-    test_manual.markdown('''
+    cols[1].image('images/test_2.png', use_column_width='auto')
+
+    cols = test_manual.columns(2)
+    cols[0].markdown('''
     In a minute, the result code samples appear to the right side. 
     ''')
-    test_manual.image('images/test_3.png', 'Sample output test code. The result can be different from yours. ', use_column_width='auto')
-    test_manual.markdown('''
+    cols[1].image('images/test_3.png', 'Sample output test code. The result can be different from yours. ', use_column_width='auto')
+
+    cols = test_manual.columns(2)
+    cols[0].markdown('''
     The result code may not be valid to execute immediately. 
     
     You may need to re-implement an appropriate test code with the result code you selected. 
     ''')
+
+    cols = test_manual.columns(2)
+    cols[0].markdown('''
+    You can also click the reaction buttons below each result box for giving your feedback. 
+    ''')
+    cols[1].image('images/feedback.png', use_column_width='auto')
 
 
     msg_bar = test_container.empty()

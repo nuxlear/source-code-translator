@@ -59,7 +59,7 @@ def get_enhancements(code, vulnerabilities=None, n=3, return_orms=False):
 def get_generation(query, n=3, return_orms=False):
     prompt = f'"""\n{query} without any explanations & test code\n"""\n\n'
 
-    candidates = generate_explanation(prompt, num_results=n, max_tokens=512, stop=['##', '%%', '# test', '"""', "'''"])
+    candidates = generate_explanation(prompt, num_results=n, max_tokens=512, stop=['##', '%%', '# test'])
 
     # cand_texts = [x.text for x in candidates if x.finish_reason == 'stop' or main_script_pattern.search(x.text) is not None]
     cand_texts = [x.text for x in candidates]
@@ -86,7 +86,7 @@ def get_modification(code, query, n=3, return_orms=False):
     query = f'"""Modify the Python 3 code above as:\n{query}\n"""'
     prompt = f'{code}\n\n{query}\n\n## Modified code\n\n'
 
-    candidates = generate_explanation(prompt, num_results=n, max_tokens=512, stop=['##', '%%', '# test', '"""', "'''"])
+    candidates = generate_explanation(prompt, num_results=n, max_tokens=512, stop=['##', '%%', '# test'])
 
     cand_texts = [x.text for x in candidates if x.finish_reason == 'stop' or main_script_pattern.search(x.text) is not None]
     cand_texts = [re.split(main_script_pattern, x, 1)[0].strip() for x in cand_texts]

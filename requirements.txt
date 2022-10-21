@@ -5,3 +5,4 @@ fastapi
 streamlit
 sqlalchemy
 mysqlclient
+streamlit_nested_layout

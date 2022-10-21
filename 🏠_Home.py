@@ -94,13 +94,17 @@ def main_page():
     Basically, all inputs are formed as prompt for their uses, 
     so each function makes a proper input prompt string for getting result from Codex model. 
 
-    You can find the page of each function on the side-bar. 
+    You can find the page of each function on the side-bar.
+    ''')
+
+    st.markdown('''
+    ---
     
     ### Code Explanation
     
     Codex model can translate the code into some explanations in English. 
     
-    With the page **[💬 Code Explanation]**, you can receive the generated explanation from your Python code. 
+    On the page **[💬 Code Explanation]**, you can receive the generated explanation from your Python code. 
     
     Also, the application will find some enhancement points from your code by using [PyLint](https://pylint.pycqa.org/en/latest/), 
     and get suggestions of the fixed version.
@@ -112,33 +116,73 @@ def main_page():
     
     ''')
 
-    exp_cols = st.columns([1, 5, 0.5, 1, 0.5, 5, 1])
-    exp_cols[1].image('images/exp_1.png')
-    exp_cols[3].image('images/arrow.png')
-    exp_cols[5].image('images/exp_3.png')
+    # exp_cols = st.columns([1, 5, 0.5, 1, 0.5, 5, 1])
+    # exp_cols[1].image('images/exp_1.png')
+    # exp_cols[3].image('images/arrow.png')
+    # exp_cols[5].image('images/exp_3.png')
+    cols = st.columns([1, 8, 1])
+    cols[1].image('images/home_1.png', 'Page screenshot of **Code Explanation**')
 
+    st.markdown('''    
+    Every result of explanations and enhancement suggestions, you can click the reaction buttons below. 
+    
+    The project collects your feedbacks and uses them for model improvement.
+     
+    ''')
     st.markdown('''
-    ### Code Generation & Modification
+    ---
+    
+    ### Code Generation & Editing
     
     Codex model can generate code described as given English text. 
     
     Also, if the code is given and the text described to make some changes to the code, 
     the model can apply the changes to the given code. 
     
+    Thus, you can generate or edit your code easily by only using English text on **[💡 Code Generation & Editing]**. 
+    \\
+    \\
+    \\
+    An example of code generation & editing is below. 
+    
     ''')
 
-    gen_cols = st.columns([1, 4, 1])
-    gen_cols[1].image('images/blank.png', use_column_width='auto')
+    gen_cols = st.columns([1, 8, 1])
+    gen_cols[1].image('images/home_2.png', use_column_width='auto')
 
     st.markdown('''
+    ---
+    
     ### Test Code Generation
 
-    TBD
-
+    It is sometimes very annoying to make some test codes for my implementation. 
+    Especially, the test cases need to be correct for checking whether the implementation is valid. 
+    
+    If you use the page **[⚙️ Test Code Generation]**, you can simply get some example test codes
+    for your code. 
+    
+    Although the code may not be executed immediately, it can provide you the code snippet
+    to make successful test code. 
+    \\
+    \\
+    \\
+    An example of test code generation is below. 
     ''')
 
     test_cols = st.columns([1, 4, 1])
-    test_cols[1].image('images/blank.png', use_column_width='auto')
+    test_cols[1].image('images/home_3.png', use_column_width='auto')
+
+    st.markdown('''
+        ---
+
+        **That's it!**
+        
+        If you have any question about the project or any suggestion for improvement,
+        Please do not hesitate to contact me. 
+        
+        My profile & links are on the sidebar. You can click the icon! ☺️
+        
+    ''')
 
 
 if __name__ == '__main__':

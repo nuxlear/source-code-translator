@@ -4,7 +4,7 @@ import streamlit as st
 
 if __name__ == '__main__':
     st.set_page_config(
-        page_title='Python Code Translator - Code Generation & Modification',
+        page_title='Python Code Translator - Code Generation & Editing',
         layout='wide'
     )
 
@@ -59,38 +59,55 @@ if __name__ == '__main__':
         st.session_state.is_context_expand = False
 
     gen_manual = gen_container.expander('See Example For Help')
-    gen_manual.markdown('''
+    cols = gen_manual.columns(2)
+    cols[0].markdown('''
     ### How To Use?
     
     1) For code generation, first enter your description of what you want to generate. 
     
     The description can be short or long enough, but try not exceeding **20 lines**. 
     ''')
-    gen_manual.image('images/gen_1.png', 'Sample input description for code generation', use_column_width='auto')
-    gen_manual.markdown('''
+    cols[1].image('images/gen_1.png', 'Sample input description for code generation', use_column_width='auto')
+
+    cols = gen_manual.columns(2)
+    cols[0].markdown('''
     After that, click the **Generate Code** button below to generate the code. 
     ''')
-    gen_manual.image('images/gen_2.png', use_column_width='auto')
-    gen_manual.markdown('''
+    cols[1].image('images/gen_2.png', use_column_width='auto')
+
+    cols = gen_manual.columns(2)
+    cols[0].markdown('''
     2) If you want to modify your code, you can expand the code input menu, and enter your code. 
     ''')
-    # gen_manual.image('images/gen_3.png', use_column_width='auto')
-    gen_manual.markdown('''
+    cols[1].image('images/gen_3_1.png', use_column_width='auto')
+
+    cols = gen_manual.columns(2)
+    cols[0].markdown('''
     Then, click the **Generate Code** button below as same as the code generation. 
     
-    The application will automatically choose the code generation/modification by checking whether the code is given. 
+    The application will automatically choose the code generation/editing by checking whether the code is given. 
     ''')
-    gen_manual.markdown('''
-    When the model finishes the job, the generated/modified code samples appear on the right side. 
+
+    cols = gen_manual.columns(2)
+    cols[0].markdown('''
+    When the model finishes the job, the generated/edited code samples appear on the right side. 
     
     The result code might be different from your intent, or sometimes invalid, so you can choose the proper code from the samples. 
     ''')
-    gen_manual.image('images/gen_4.png', 'Sample output code. The result can be different from yours. ', use_column_width='auto')
-    gen_manual.markdown('''
+    cols[1].image('images/gen_5_1.png', 'Sample output code. The result can be different from yours. ', use_column_width='auto')
+
+    cols = gen_manual.columns(2)
+    cols[0].markdown('''
     👉 If you didn't get an appropriate results, you may need to change your description or just retry it!
     
     The results can vary according to your input and trials. 
     ''')
+
+    cols = gen_manual.columns(2)
+    cols[0].markdown('''
+    You can also click the reaction buttons below each result box for giving your feedback. 
+    ''')
+    cols[1].image('images/feedback.png', use_column_width='auto')
 
     msg_bar = gen_container.empty()
     gen_ui = gen_container.container()
@@ -100,7 +117,7 @@ if __name__ == '__main__':
     with gen_input_form:
         gen_context_container = gen_input_form.expander('👉 Click here to edit your code',
                                                         expanded=st.session_state.is_context_expand)
-        gen_context_code = gen_context_container.text_area('Enter your code for editting',
+        gen_context_code = gen_context_container.text_area('Enter your code for editing',
                                                            value=st.session_state.gen_input[0] if st.session_state.gen_input else '',
                                                            height=500, key='gen_input_code')
         gen_query = gen_input_form.text_area('Explain your code, or Explain the differences you want to change',

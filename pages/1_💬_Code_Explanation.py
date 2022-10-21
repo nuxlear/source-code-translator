@@ -58,32 +58,53 @@ if __name__ == '__main__':
         st.session_state.exp_results = None
 
     exp_manual = exp_container.expander('See Example For Help')
-    exp_manual.markdown('''
+    cols = exp_manual.columns(2)
+    cols[0].markdown('''
     ### How to Use?
     First, Enter your code to input text box on the left side. 
     
     The code must not to be too long, **30-40 lines** are generally okay. 
     ''')
-    # st.image()
-    exp_manual.image('images/exp_1.png', 'Sample input code for code explanation', use_column_width='auto')
-    exp_manual.markdown('''
+    cols[1].image('images/exp_1.png', 'Sample input code for code explanation', use_column_width='auto')
+
+    cols = exp_manual.columns(2)
+    cols[0].markdown('''
     Then click the **"Explain"** Button below. Then the model starts to generate the explanation.
     ''')
-    exp_manual.image('images/exp_2.png', use_column_width='auto')
-    exp_manual.markdown('''
+    cols[1].image('images/exp_2.png', use_column_width='auto')
+
+    cols = exp_manual.columns(2)
+    cols[0].markdown('''
     When the model succeeds to generate the result, the explanation appears on the right side. 
     ''')
-    exp_manual.image('images/exp_3.png', 'Sample output explanation. The result can be different from yours. ', use_column_width='auto')
-    exp_manual.markdown('''
+    cols[1].image('images/exp_3.png', 'Sample output explanation. The result can be different from yours. ', use_column_width='auto')
+
+    cols = exp_manual.columns(2)
+    cols[0].markdown('''
     If there are some vulnerabilities which can be improved, it shows the list of them. 
     ''')
-    exp_manual.image('images/exp_4.png', use_column_width='auto')
-    exp_manual.markdown('''
+    cols[1].image('images/exp_4.png', use_column_width='auto')
+
+    cols = exp_manual.columns(2)
+    cols[0].markdown('''
     Once you click the one of the item, it shows the type of vulnerability and **"Suggest To Fix"** button. 
     
-    You can receive up to 3 code samples which fix the vulnerability. 
+    By clicking the button, the model additionally generates the result code of suggestion 
+    which may apply the enhancement point, up to 3 results. 
+    
+    So, you can choose the result for using freely.  
     
     ''')
+    cols[1].image('images/exp_5.png', use_column_width='auto')
+
+    cols = exp_manual.columns(2)
+    cols[0].markdown('''
+    Moreover, all the results of explanation and suggestion, you can give feedback with clicking button below.
+    
+    Your feedback makes the model get improved and continuously developed ☺️
+    
+    ''')
+    cols[1].image('images/feedback.png', use_column_width='auto')
 
     # TODO: Add suggest to fix examples
 
