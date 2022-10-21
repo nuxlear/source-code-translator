@@ -117,6 +117,15 @@ if __name__ == '__main__':
     ''')
     cols[1].image('images/feedback.png', use_column_width='auto')
 
+    gen_manual.markdown('---')
+    cols = gen_manual.columns(2)
+    cols[0].markdown('''
+    ### Quickstart
+
+    Let's start with the sample text below!
+    ''')
+    cols[0].code('Simple code for calculating Fibonacci numbers with recursive function', language='markdown')
+
     msg_bar = gen_container.empty()
     gen_ui = gen_container.container()
     input_cols, output_cols = gen_ui.columns(2, gap='medium')

@@ -11,14 +11,14 @@ main_script_pattern = re.compile('if __name__ == ([\'\"]__main__[\'\"]:)?')
 
 
 def get_explanation(code, n=3, return_orms=False):
-    query = '"""\nThe explanation of the Python 3 code above is here:\n\n  '
+    query = '"""\nThe explanation of the Python 3 code above is here:\n\n'
     prompt = f'{code}\n\n{query}'
 
     candidates = generate_explanation(prompt, num_results=n, max_tokens=384, stop='"""')
 
     cand_texts = [x.text.split('"""')[0] for x in candidates if x.finish_reason == 'stop' or '"""' in x.text]
     res_texts = [x for x in cand_texts if len(x.strip()) > 0]
-    results = [f'The explanation of the Python 3 code:\n\n  {x}' for x in res_texts]
+    results = [f'The explanation of the Python 3 code:\n\n{x}' for x in res_texts]
 
     filename = record_user_data(code, None, candidates, results)
     if return_orms:
