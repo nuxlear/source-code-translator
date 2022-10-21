@@ -17,7 +17,7 @@ def find_vulnerabilities(code):
     reporter = JSONReporter(lint_output)
 
     with redirect_stdout(lint_output):
-        Run([str(code_file), '--output-format=json', '--disable=E0602,E1101,E0401'], reporter=reporter, exit=False)
+        Run([str(code_file), '--output-format=json', '--disable=E0602,E1101,E0401,W1401'], reporter=reporter, exit=False)
 
     report = lint_output.getvalue()
     report = json.loads(report)
