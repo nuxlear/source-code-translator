@@ -1,7 +1,7 @@
 from code_translator.core import generate_explanation
 from code_translator.validate import find_vulnerabilities, make_prompt_query_for_enhancement, is_same_vulnerability
 from code_translator.utils import save_code_to_tmp_file, record_user_data
-from code_translator.db import CodeTranslateFeedback, insert
+from code_translator.db import CodeTranslateFeedback, insert, get_db_engine, get_session
 
 import os
 import re
@@ -23,8 +23,9 @@ def get_explanation(code, n=3, return_orms=False):
     filename = record_user_data(code, None, candidates, results)
     if return_orms:
         orms = [CodeTranslateFeedback(filename=filename, input_text=prompt, output_text=x, type='explain') for x in results]
-        for orm in orms:
-            insert(orm)
+        with get_session(get_db_engine('db_tokens_main.json')) as session:
+            for orm in orms:
+                insert(orm, session)
         return results, orms
     return results
 
@@ -52,8 +53,9 @@ def get_enhancements(code, vulnerabilities=None, n=3, return_orms=False):
 
         filename = record_user_data(code, v["message"], candidates, answers)
         _orms = [CodeTranslateFeedback(filename=filename, input_text=prompt, output_text=x, type='explain') for x in answers]
-        for orm in _orms:
-            insert(orm)
+        with get_session(get_db_engine('db_tokens_main.json')) as session:
+            for orm in _orms:
+                insert(orm, session)
 
         results.append((v, answers, _orms) if return_orms else (v, answers))
 
@@ -81,8 +83,9 @@ def get_generation(query, n=3, return_orms=False):
     filename = record_user_data(None, query, candidates, results)
     if return_orms:
         orms = [CodeTranslateFeedback(filename=filename, input_text=prompt, output_text=x, type='generate') for x in results]
-        for orm in orms:
-            insert(orm)
+        with get_session(get_db_engine('db_tokens_main.json')) as session:
+            for orm in orms:
+                insert(orm, session)
         return results, orms
     return results
 
@@ -110,8 +113,9 @@ def get_modification(code, query, n=3, return_orms=False):
     filename = record_user_data(code, orig_query, candidates, results)
     if return_orms:
         orms = [CodeTranslateFeedback(filename=filename, input_text=prompt, output_text=x, type='generate') for x in results]
-        for orm in orms:
-            insert(orm)
+        with get_session(get_db_engine('db_tokens_main.json')) as session:
+            for orm in orms:
+                insert(orm, session)
         return results, orms
     return results
 
@@ -135,8 +139,9 @@ def get_test_code(code, n=3, return_orms=False):
     filename = record_user_data(code, None, candidates, results)
     if return_orms:
         orms = [CodeTranslateFeedback(filename=filename, input_text=prompt, output_text=x, type='test') for x in results]
-        for orm in orms:
-            insert(orm)
+        with get_session(get_db_engine('db_tokens_main.json')) as session:
+            for orm in orms:
+                insert(orm, session)
         return results, orms
     return results
 

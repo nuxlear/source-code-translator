@@ -88,12 +88,22 @@ def wrap_db_success(func):
 
 
 # @wrap_db_success
-def insert(orm):
-    with get_session(get_db_engine('db_tokens_main.json')) as session:
+def insert(orm, session=None):
+    if session is None:
+        session = get_session(get_db_engine('db_tokens_main.json'))
+
+    try:
         keys = [x.key for x in orm.__table__.c if x.key not in ['id', 'timestamp']]
         o = orm.__class__(**{k: getattr(orm, k) for k in keys})
         session.add(o)
         session.commit()
+        session.close()
+        return True
+    except SQLAlchemyError as e:
+        print(e.__traceback__)
+        print(e)
+        session.close()
+        return False
 
 
 # @wrap_db_success
