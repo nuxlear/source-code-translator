@@ -53,6 +53,9 @@ def record_user_data(code=None, query=None, candidates=None, results=None):
         'candidates': [dict(x) for x in candidates],
         'results': results,
     }
+
+    os.makedirs('userdata', exist_ok=True)
+
     item_id = uuid.uuid4()
     filename = f'{item_id}.json'
     with open(f'userdata/{filename}', 'w', encoding='utf-8') as f:
