@@ -64,11 +64,11 @@ def record_user_data(code=None, query=None, candidates=None, results=None):
         with get_session(engine) as session:
             session.add(orm)
             session.commit()
-        return True
+        return filename
     except SQLAlchemyError as e:
         print(e)
         print(e.__traceback__)
-        return False
+        return None
 
 
 def find_valid_objects_in_code(code):

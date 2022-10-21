@@ -3,6 +3,11 @@ import streamlit as st
 
 
 if __name__ == '__main__':
+    st.set_page_config(
+        page_title='Python Code Translator - Test Code Generation',
+        layout='wide'
+    )
+
     st.write(
         """<style>
         [data-testid="stSidebar"] [data-testid="stImage"] {
@@ -99,19 +104,31 @@ if __name__ == '__main__':
         elif st.session_state.test_results is None:
             with output_results:
                 with st.spinner('Generating...'):
-                    res = get_test_code(code)
+                    res, orms = get_test_code(code, return_orms=True)
 
             if len(res) == 0:
                 msg_bar.error('No results found...', icon='⚠️')
                 output_results.code('No Results. \n\nTry another code or Retry it. ', language='markdown')
             else:
-                st.session_state.test_results = res
+                st.session_state.test_results = (res, orms)
 
         if st.session_state.test_results is not None:
-            res = st.session_state.test_results
+            res, orms = st.session_state.test_results
+            infos = [(x.filename, x.input_text, x.output_text) for x in orms]
 
             msg_bar.success('Success!', icon='✅')
             output_list = output_results.container()
             for i, gen in enumerate(res):
                 gen_box = output_list.expander(f'Test Code #{i+1}', expanded=True)
                 gen_box.code(gen, language='python')
+
+                reactions = gen_box.columns([1, 1, 5])
+                good_btn = reactions[0].button('👍', key=f'test_good_{i}')
+                bad_btn = reactions[1].button('👎', key=f'test_bad_{i}')
+
+                if good_btn:
+                    update_reaction(*infos[i], 'test', 'good')
+                    reactions[2].success('Thank you for your feedback! "👍"')
+                if bad_btn:
+                    update_reaction(*infos[i], 'test', 'bad')
+                    reactions[2].error('Thank you for your feedback! "👎"')

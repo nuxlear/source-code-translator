@@ -1,8 +1,14 @@
 from code_translator import *
 import streamlit as st
+import streamlit_nested_layout
 
 
 if __name__ == '__main__':
+    st.set_page_config(
+        page_title='Python Code Translator - Code Explanation',
+        layout='wide'
+    )
+
     st.write(
         """<style>
         [data-testid="stSidebar"] [data-testid="stImage"] {
@@ -94,6 +100,7 @@ if __name__ == '__main__':
 
     output_container.write('Results')
     output_text = output_container.empty()
+    output_reaction = output_container.empty()
     suggests = output_container.empty()
 
     if exp_button or st.session_state.exp_input is not None:
@@ -107,22 +114,34 @@ if __name__ == '__main__':
         elif st.session_state.exp_results is None:
             with output_container:
                 with st.spinner('Generating...'):
-                    res = get_explanation(code)
+                    res, orms = get_explanation(code, return_orms=True)
 
             if len(res) == 0:
                 msg_bar.error('No results found...', icon='⚠️')
                 output_text.code('No Results. \n\nTry another code or Retry it. ', language='markdown')
             else:
                 explanation = res[0]
+                orm = orms[0]
                 vuls = find_vulnerabilities(code)
 
-                st.session_state.exp_results = (explanation, vuls)
+                st.session_state.exp_results = (explanation, orm, vuls)
 
         if st.session_state.exp_results is not None:
-            explanation, vuls = st.session_state.exp_results
+            explanation, orm, vuls = st.session_state.exp_results
 
             msg_bar.success('Success!', icon='✅')
             output_text.markdown(explanation)
+
+            reactions = output_reaction.columns([1, 1, 5])
+            good_btn = reactions[0].button('👍', key='exp_good')
+            bad_btn = reactions[1].button('👎', key='exp_bad')
+
+            if good_btn:
+                update_reaction(orm.filename, orm.input_text, orm.output_text, 'explain', 'good')
+                reactions[2].success('Thank you for your feedback! "👍"')
+            if bad_btn:
+                update_reaction(orm.filename, orm.input_text, orm.output_text, 'explain', 'bad')
+                reactions[2].error('Thank you for your feedback! "👎"')
 
             if 'fix_form' not in st.session_state:
                 st.session_state.fix_form = {}
@@ -146,14 +165,25 @@ if __name__ == '__main__':
                         if st.session_state.fix_form[form_key] is None:
                             with v_content:
                                 with st.spinner(''):
-                                    _, suggestions = get_enhancements(exp_input, vulnerabilities=[v])[0]
-                                    st.session_state.fix_form[form_key] = suggestions
+                                    _, suggestions, sug_orms = get_enhancements(exp_input, vulnerabilities=[v], return_orms=True)[0]
+                                    st.session_state.fix_form[form_key] = (suggestions, sug_orms)
 
                         if st.session_state.fix_form[form_key] is not None:
-                            suggestions = st.session_state.fix_form[form_key]
-                            for f, sug in enumerate(suggestions):
+                            (suggestions, sug_orms) = st.session_state.fix_form[form_key]
+                            for f, (sug, orm) in enumerate(zip(suggestions, sug_orms)):
                                 v_content.write(f'Fixed version #{f+1}')
                                 v_content.code(sug)
+                                sug_reaction = v_content.columns([1, 1, 5])
+
+                                good_btn = sug_reaction[0].button('👍', key=f'sug_{i}_good_{f}')
+                                bad_btn = sug_reaction[1].button('👎', key=f'sug_{i}_bad_{f}')
+
+                                if good_btn:
+                                    update_reaction(orm.filename, orm.input_text, orm.output_text, 'explain', 'good')
+                                    sug_reaction[2].success('Thank you for your feedback! "👍"')
+                                if bad_btn:
+                                    update_reaction(orm.filename, orm.input_text, orm.output_text, 'explain', 'bad')
+                                    sug_reaction[2].error('Thank you for your feedback! "👎"')
 
                             if len(suggestions) == 0:
                                 v_content.error('There is no affordable suggestions. ')
