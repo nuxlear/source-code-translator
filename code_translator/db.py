@@ -107,30 +107,31 @@ def insert(orm, session=None):
 
 
 # @wrap_db_success
-def update_reaction(filename, input_text, output_text, type: str, reaction: str):
+def update_reaction(filename, input_text, output_text, type: str, reaction: str, use_db=False):
     assert reaction in ['good', 'bad'], f'Invalid reaction: {reaction}'
-    with get_session(get_db_engine('db_tokens_main.json')) as session:
-        o = CodeTranslateFeedback(filename=filename,
-                                  input_text=input_text,
-                                  output_text=output_text,
-                                  type=type)
-        # res = [x for x in list(session.query(CodeTranslateFeedback).all())
-        #        if x.filename == o.filename and
-        #        x.input_text == o.input_text and
-        #        x.output_text == o.output_text and
-        #        x.type == o.type]
-        res = list(session.query(CodeTranslateFeedback).filter(
-            (CodeTranslateFeedback.filename == o.filename) &
-            (CodeTranslateFeedback.input_text == o.input_text) &
-            (CodeTranslateFeedback.output_text == o.output_text) &
-            (CodeTranslateFeedback.type == o.type)
-        ).all())
-        if len(res) == 0:
-            o.reaction = reaction
-            insert(o)
-        else:
-            res[0].reaction = reaction
-        session.commit()
+    if use_db:
+        with get_session(get_db_engine('db_tokens_main.json')) as session:
+            o = CodeTranslateFeedback(filename=filename,
+                                      input_text=input_text,
+                                      output_text=output_text,
+                                      type=type)
+            # res = [x for x in list(session.query(CodeTranslateFeedback).all())
+            #        if x.filename == o.filename and
+            #        x.input_text == o.input_text and
+            #        x.output_text == o.output_text and
+            #        x.type == o.type]
+            res = list(session.query(CodeTranslateFeedback).filter(
+                (CodeTranslateFeedback.filename == o.filename) &
+                (CodeTranslateFeedback.input_text == o.input_text) &
+                (CodeTranslateFeedback.output_text == o.output_text) &
+                (CodeTranslateFeedback.type == o.type)
+            ).all())
+            if len(res) == 0:
+                o.reaction = reaction
+                insert(o)
+            else:
+                res[0].reaction = reaction
+            session.commit()
 
 
 if __name__ == '__main__':

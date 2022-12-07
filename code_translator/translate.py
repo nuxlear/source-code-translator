@@ -10,7 +10,7 @@ import re
 main_script_pattern = re.compile('if __name__ == ([\'\"]__main__[\'\"]:)?')
 
 
-def get_explanation(code, n=3, return_orms=False):
+def get_explanation(code, n=3, return_orms=False, use_db=False):
     query = '"""\nThe explanation of the Python 3 code above is here:\n\n'
     prompt = f'{code}\n\n{query}'
 
@@ -20,17 +20,18 @@ def get_explanation(code, n=3, return_orms=False):
     res_texts = [x for x in cand_texts if len(x.strip()) > 0]
     results = [f'The explanation of the Python 3 code:\n\n{x}' for x in res_texts]
 
-    filename = record_user_data(code, None, candidates, results)
+    filename = record_user_data(code, None, candidates, results, use_db=use_db)
     if return_orms:
         orms = [CodeTranslateFeedback(filename=filename, input_text=prompt, output_text=x, type='explain') for x in results]
-        with get_session(get_db_engine('db_tokens_main.json')) as session:
-            for orm in orms:
-                insert(orm, session)
+        if use_db:
+            with get_session(get_db_engine('db_tokens_main.json')) as session:
+                for orm in orms:
+                    insert(orm, session)
         return results, orms
     return results
 
 
-def get_enhancements(code, vulnerabilities=None, n=3, return_orms=False):
+def get_enhancements(code, vulnerabilities=None, n=3, return_orms=False, use_db=False):
     if vulnerabilities is None:
         vulnerabilities = find_vulnerabilities(code)
 
@@ -51,18 +52,19 @@ def get_enhancements(code, vulnerabilities=None, n=3, return_orms=False):
             if is_valid_code and not is_vul_remains:
                 answers.append(cand_text)
 
-        filename = record_user_data(code, v["message"], candidates, answers)
+        filename = record_user_data(code, v["message"], candidates, answers, use_db=use_db)
         _orms = [CodeTranslateFeedback(filename=filename, input_text=prompt, output_text=x, type='explain') for x in answers]
-        with get_session(get_db_engine('db_tokens_main.json')) as session:
-            for orm in _orms:
-                insert(orm, session)
+        if use_db:
+            with get_session(get_db_engine('db_tokens_main.json')) as session:
+                for orm in _orms:
+                    insert(orm, session)
 
         results.append((v, answers, _orms) if return_orms else (v, answers))
 
     return results
 
 
-def get_generation(query, n=3, return_orms=False):
+def get_generation(query, n=3, return_orms=False, use_db=False):
     prompt = f'"""\n{query} without any explanations & test code\n"""\n\n'
 
     candidates = generate_explanation(prompt, num_results=n, max_tokens=512, stop=['##', '%%', '# test'])
@@ -80,17 +82,18 @@ def get_generation(query, n=3, return_orms=False):
         if is_valid_code:
             results.append(cand_text)
 
-    filename = record_user_data(None, query, candidates, results)
+    filename = record_user_data(None, query, candidates, results, use_db=use_db)
     if return_orms:
         orms = [CodeTranslateFeedback(filename=filename, input_text=prompt, output_text=x, type='generate') for x in results]
-        with get_session(get_db_engine('db_tokens_main.json')) as session:
-            for orm in orms:
-                insert(orm, session)
+        if use_db:
+            with get_session(get_db_engine('db_tokens_main.json')) as session:
+                for orm in orms:
+                    insert(orm, session)
         return results, orms
     return results
 
 
-def get_modification(code, query, n=3, return_orms=False):
+def get_modification(code, query, n=3, return_orms=False, use_db=False):
     orig_query = query
     query = f'"""Modify the Python 3 code above as:\n{query}\n"""'
     prompt = f'{code}\n\n{query}\n\n## Modified code\n\n'
@@ -110,17 +113,18 @@ def get_modification(code, query, n=3, return_orms=False):
         if is_valid_code:
             results.append(cand_text)
 
-    filename = record_user_data(code, orig_query, candidates, results)
+    filename = record_user_data(code, orig_query, candidates, results, use_db=use_db)
     if return_orms:
         orms = [CodeTranslateFeedback(filename=filename, input_text=prompt, output_text=x, type='generate') for x in results]
-        with get_session(get_db_engine('db_tokens_main.json')) as session:
-            for orm in orms:
-                insert(orm, session)
+        if use_db:
+            with get_session(get_db_engine('db_tokens_main.json')) as session:
+                for orm in orms:
+                    insert(orm, session)
         return results, orms
     return results
 
 
-def get_test_code(code, n=3, return_orms=False):
+def get_test_code(code, n=3, return_orms=False, use_db=False):
     query = f'## Test code for the Python 3 code above\n\ndef test():\n'
     prompt = f'{code}\n\n{query}'
 
@@ -139,9 +143,10 @@ def get_test_code(code, n=3, return_orms=False):
     filename = record_user_data(code, None, candidates, results)
     if return_orms:
         orms = [CodeTranslateFeedback(filename=filename, input_text=prompt, output_text=x, type='test') for x in results]
-        with get_session(get_db_engine('db_tokens_main.json')) as session:
-            for orm in orms:
-                insert(orm, session)
+        if use_db:
+            with get_session(get_db_engine('db_tokens_main.json')) as session:
+                for orm in orms:
+                    insert(orm, session)
         return results, orms
     return results
 

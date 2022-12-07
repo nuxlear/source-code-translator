@@ -41,7 +41,7 @@ def remove_syntax_error_in_code(code):
     return None
 
 
-def record_user_data(code=None, query=None, candidates=None, results=None):
+def record_user_data(code=None, query=None, candidates=None, results=None, use_db=False):
     if (code, query) == (None, None):
         raise ValueError('One of `code` or `query` must not be None. ')
     candidates = candidates or []
@@ -61,17 +61,20 @@ def record_user_data(code=None, query=None, candidates=None, results=None):
     with open(f'userdata/{filename}', 'w', encoding='utf-8') as f:
         json.dump(d, f, indent=4)
 
-    engine = get_db_engine('db_tokens_main.json')
-    orm = CodeTranslateResults(filename=filename)
-    try:
-        with get_session(engine) as session:
-            session.add(orm)
-            session.commit()
+    if use_db:
+        engine = get_db_engine('db_tokens_main.json')
+        orm = CodeTranslateResults(filename=filename)
+        try:
+            with get_session(engine) as session:
+                session.add(orm)
+                session.commit()
+            return filename
+        except SQLAlchemyError as e:
+            print(e)
+            print(e.__traceback__)
+            return None
+    else:
         return filename
-    except SQLAlchemyError as e:
-        print(e)
-        print(e.__traceback__)
-        return None
 
 
 def find_valid_objects_in_code(code):
